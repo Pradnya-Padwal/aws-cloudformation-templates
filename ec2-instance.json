@@ -1,13 +1,31 @@
 {
+    "AWSTemplateFormatVersion": "2010-09-09",
     "Resources": {
-        "MyInstance": {
-            "Type": "AWS::EC2::Instance",
-            "Properties": {
-               "AvailabilityZone": "us-east-1a",
-               "ImageId": "ami-a4c7edb2",
-               "InstanceType": "t2.micro"
+        "ec2ins": {
+          "Type": "AWS::EC2::Instance",
+          "Properties":{
+            "ImageId": "ami-09d95fab7fff3776c",
+            "InstanceType": "t2.micro",
+            "SecurityGroups": [{
+                "Ref": "InstanceSG"
             }
+            ]
+          }
+          },
+        "InstanceSG": {
+        "Type": "AWS::EC2::SecurityGroup",
+        "Properties": {
+            "GroupDescription": "Enable SSH port via port 22",
+            "SecurityGroupIngress" : [{
+              "IpProtocol" : "tcp",
+              "FromPort" : 22,
+              "ToPort" : 22,
+              "CidrIp" : "0.0.0.0/0"
+      }]
+            
         }
+        
+    }   
+            
     }
 }
-{
