@@ -1,0 +1,88 @@
+{
+"AWSTemplateFormatVersion": "2010-09-09",
+"Description": "Setup Ec2 Instance with Apache Server",
+"Parameters": {
+"InstanceType": {
+"Description": "EC2 Configuration",
+"Type": "String",
+"Default": "t2.micro",
+"AllowedValues": ["t2.micro", "t2.small", "t2.medium"],
+"ConstraintDescription": "Must be valid Instance Type"
+},
+"KeyName": {
+"Description": "SSH Key",
+"Type": "AWS::EC2::KeyPair::KeyName"
+}
+},
+"Resources": {
+"MyEC2Inst": {
+"Type": "AWS::EC2::Instance",
+"Properties": {
+"ImageId": "ami-0e9089763828757e1",
+"InstanceType": { "Ref" : "InstanceType" },
+"KeyName": { "Ref" : "KeyName" },
+"SecurityGroups": [
+{ "Ref" : "WebSG" }
+],
+"UserData": { "Fn::Base64" : { "Fn::Join" : [
+"", [
+"#!/bin/bash\n",
+"sudo su\n",
+"yum update -y\n",
+"yum install httpd -y\n",
+"service httpd start\n",
+"chkconfig httpd on\n",
+"echo '<html><h1>This is served from server<i>$HOSTNAME</i></h1></html>'>/var/www/html/index.html"
+]
+]
+
+
+}
+
+}
+}
+},
+"WebSG": {
+"Type": "AWS::EC2::SecurityGroup",
+"Properties": {
+"GroupDescription": "Allow HTTP Traffic",
+"SecurityGroupIngress": [
+{
+"FromPort": "80",
+"ToPort": "80",
+"IpProtocol": "tcp",
+"CidrIp": "0.0.0.0/0"
+},
+{
+"FromPort": "22",
+"ToPort": "22",
+"IpProtocol": "tcp",
+"CidrIp": "0.0.0.0/0"
+
+}
+
+]
+}
+}
+},
+"Outputs": {
+"ServerIp": {
+"Description": "HTTP Server URL",
+"Value": {
+"Fn::Join": [
+"",
+[
+"http://",
+{
+"Fn::GetAtt" : [
+"MyEC2Inst",
+"PublicDnsName"
+]
+}
+]
+]
+}
+
+}
+}
+}
