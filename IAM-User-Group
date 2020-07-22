@@ -1,0 +1,84 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Template for IAM Users, Groups, Roles",
+    "Parameters": {
+        "Password": {
+            "NoEcho": "True",
+            "Type": "String",
+            "Description": "Enter New Account Password",
+            "MinLength": "1",
+            "MaxLength": "41",
+            "ConstraintDescription": "Password must be in betweeb 1 to 41"
+        }
+    },
+    "Resources": {
+        "SampleUser": {
+            "Type": "AWS::IAM::User",
+            "Properties": {
+                "LoginProfile": {
+                    "Password": { "Ref" : "Password" }
+                }
+            }
+            },
+        "MyGroup": {
+            "Type": "AWS::IAM::Group"
+        },
+        "AdminGroup": {
+            "Type": "AWS::IAM::Group"
+        },
+        "Users": {
+          "Type": "AWS::IAM::UserToGroupAddition",
+          "Properties": {
+            "GroupName": { "Ref" : "MyGroup" },
+            "Users" : [ { "Ref" : "SampleUser" } ]
+        }
+                },
+        "Admins": {
+          "Type": "AWS::IAM::UserToGroupAddition",
+          "Properties": {
+              "GroupName": { "Ref" : "AdminGroup" },
+              "Users": [ { "Ref" : "SampleUser" } ]
+          
+          }
+        },
+        "UserPolicies": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "SampleUser",
+                "PolicyDocument": {
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Action": [
+                            "cloudformation:Describe",
+                            "cloudformation:List*",
+                            "cloudformation:Get*"
+                            ],
+                        "Resource" : "*"
+                    }]
+                },
+                "Groups": [{ "Ref" : "MyGroup"}] 
+            }
+        },
+        "AdminPolicies": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "Admin",
+                "PolicyDocument": {
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Action": "cloudformation:*",
+                        "Resource": "*"
+                    }]
+                },
+                "Groups": [{ "Ref" : "AdminGroup"}]
+            }
+        },
+        "AccessCFNKeys": {
+            "Type": "AWS::IAM::AccessKey",
+            "Properties": {
+                "UserName": { "Ref" : "SampleUser" }
+            }
+        }
+            }
+        }
+    
